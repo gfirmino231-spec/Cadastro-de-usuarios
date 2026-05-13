@@ -1,15 +1,33 @@
 import './style.css'
+import  { useState } from 'react';
+
 function Home() {
+
+  
+
   return (
   <>
+  
+
    <div className='box'>
       <h1 className='titulo'>Cadastro de usuários</h1>
+
       
-      <input type="text" name='nome' id='nome' placeholder='Seu Nome' />
-      <input type="idade" name='idade' id='idade' placeholder='Sua Idade' />
-      <input type="text" name="email" id="email" placeholder='Seu email' />
+        <input className='inputNome' type="text" id="nome" placeholder="Seu Nome"></input>
+
+        <input className='inputEmail' type="text" id="email" placeholder="Seu email."></input>
       
-  </div>
+        <input className='inputIdade' type="number" id="idade" placeholder="Sua idade"></input>
+
+        <button className='botao'>
+          <p className='paragrafoBotao'>
+            Cadastrar
+          </p>
+          </button>     
+      
+        
+      
+    </div>
     
   </>
 )  

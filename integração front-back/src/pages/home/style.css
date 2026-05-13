@@ -1,6 +1,6 @@
 .box{
     border: 2px solid #333;
-    padding: 30px  30px;
+    padding: 20px  20px;
     height: 440px;
     border-radius: 8px;
     width: 370px;
@@ -9,7 +9,7 @@
     display: flex;
     flex-direction:column;
     align-items:center;
-    gap: 20px;
+    gap: 40px;
     
 }
 .titulo{
@@ -17,4 +17,33 @@
   text-align:center;
   white-space: nowrap;
   
+}
+
+.inputNome, .inputIdade, .inputEmail {
+    border-radius: 15px;
+    padding: 12px 10px 8px;
+    background-color: #2d2a5e;
+    width: 300px;
+        
+}
+
+.inputNome::placeholder{
+    color: rgba(255, 255, 255, 0.7);
+    text-align: left;
+}
+.inputIdade::placeholder{
+    color: rgba(255, 255, 255, 0.7)
+}
+.inputEmail::placeholder{
+    color: rgba(255, 255, 255, 0.7)
+
+}
+.botao{
+    border-radius: 15px;
+    padding: 12px 10px 8px;
+    background-color:#a5a1fc;
+    width: 300px;
+}
+.paragrafoBotao{
+    color: #ffff;
 }
