@@ -66,3 +66,7 @@
     justify-content: space-between;
     flex-direction: column;
 }
+.botaoDeExcluir{
+    background-color: transparent;
+    border: none;
+}
