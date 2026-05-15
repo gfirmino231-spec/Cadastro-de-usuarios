@@ -10,7 +10,14 @@ function Home() {
   }
   const [clicar, setClicar] = useState<{nome: string, idade: string, email: string}[]>([]);
   const aoClicar = () =>{
-    setClicar([...clicar , formulario])
+    if (clicar.length <2){
+      setClicar([...clicar , formulario])
+      setFormulario({nome: '', idade: '',email:''})
+      
+    }
+  } 
+  const deletarUsuario = (index: number) =>{
+    setClicar(clicar.filter((_,i)=> i !== index))
   }
 
   return (
@@ -38,7 +45,7 @@ function Home() {
       
     </div>
 
-    {clicar.map((usuario)=>(
+    {clicar.map((usuario,index)=>(
       <div className='usuariosCadastrados'>
         <div className='informacoesCadastro'>
           <p className='usuarioNome'> 
@@ -51,7 +58,9 @@ function Home() {
           Idade: {usuario.idade}
         </p>
         </div>
-        <FaTrash/>
+         < button className='botaoDeExcluir' onClick={()=>deletarUsuario(index)}>
+           <FaTrash/>
+         </button>
       </div>
     ))}
     
