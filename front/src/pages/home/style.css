@@ -1,0 +1,73 @@
+.box{
+    border: 2px solid #333;
+    padding: 15px  15px;
+    border-radius: 8px;
+    width: 370px;
+    margin: 10px;
+    background-color: #252243;
+    display: flex;
+    align-items:center;
+    gap: 40px;
+    flex-direction: column;
+    
+    
+}
+.titulo{
+  color:white;
+  text-align:center;
+  white-space: nowrap;
+  
+}
+
+.inputNome, .inputIdade, .inputEmail {
+    border-radius: 15px;
+    padding: 12px 10px 8px;
+    background-color: #2d2a5e;
+    width: 300px;
+    color: #fff;
+        
+}
+
+.inputNome::placeholder{
+    color: rgba(255, 255, 255, 0.7);
+    
+}
+.inputIdade::placeholder{
+    color: rgba(255, 255, 255, 0.7)
+}
+.inputEmail::placeholder{
+    color: rgba(255, 255, 255, 0.7)
+
+}
+.botao{
+    border-radius: 15px;
+    padding: 12px 10px 8px;
+    background-color:#a5a1fc;
+    width: 300px;
+}
+.paragrafoBotao{
+    color: #ffff;
+}
+.usuariosCadastrados{
+    gap: 3px;
+    border-radius: 8px;
+    padding: 9px 8px 8px;
+    border: 2px solid #333;
+    background-color: #252243;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    
+}
+.usuarioNome, .usuarioEmail, .usuarioIdade{
+    color: #fff;
+}
+.informacoesCadastro{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+.botaoDeExcluir{
+    background-color: transparent;
+    border: none;
+}
