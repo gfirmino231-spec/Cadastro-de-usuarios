@@ -8,8 +8,8 @@ export class UsuarioController {
         
     }
 @Post()
-     create(@Body()criarUsuarioDto:CriarUsuarioDto){
-        return this.usuarioService.salvar(criarUsuarioDto);
+     create(@Body()dadosDoUsario:CriarUsuarioDto){
+        return this.usuarioService.salvar(dadosDoUsario);
          
     }
 @Get()
