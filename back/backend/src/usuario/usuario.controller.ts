@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { CriarUsuarioDto } from './dto/criar-usuario.dto';
 import { UsuarioService } from './usuario.service';
 import { ListaUsuarioDTO } from "./dto/ListaUsuarioDTO";
 import { AtualizaUsuarioDTO } from "./dto/AtualizaUsuarioDTO";
-import { v4 as uuid} from "uuid"
 import { UsuarioEntity } from './usuarioEntity';
 
 
@@ -21,11 +20,12 @@ export class UsuarioController {
         const usuarioEntity = new UsuarioEntity();
         usuarioEntity.email = dadosDoUsuario.email;
         usuarioEntity.nome = dadosDoUsuario.nome;
-        usuarioEntity.id = uuid();
+        usuarioEntity.idade = dadosDoUsuario.idade;
 
-       await  this.usuarioService.salvar(usuarioEntity);
+        const usuarioCriado = await this.usuarioService.salvar(usuarioEntity)
+
        return {
-        usuario: new ListaUsuarioDTO(usuarioEntity.id,usuarioEntity.nome),
+        usuario: new ListaUsuarioDTO(usuarioCriado.id,usuarioCriado.nome,usuarioCriado.email,usuarioCriado.idade),
         message: "usuario criado com sucesso"}
 
            
@@ -38,14 +38,19 @@ export class UsuarioController {
             usuario => new ListaUsuarioDTO(
                 usuario.id,
                 usuario.nome,
+                usuario.email,
+                usuario.idade,
             )
+
         );
+       
+        
         return usuariosLista ;  
         
     }
     @Put('/:id')
     async atualizaUsuario(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() novosDados: AtualizaUsuarioDTO
 ) {
     const usuarioAtualizado = await this.usuarioService.atualizar(
@@ -59,7 +64,7 @@ export class UsuarioController {
     };
 }
     @Delete('/:id')
-    async removeUsuario (@Param('id') id: string){
+    async removeUsuario (@Param('id',ParseIntPipe) id: number){
     const  usuarioRemovido = await this.usuarioService.remove(id);
 
     return {

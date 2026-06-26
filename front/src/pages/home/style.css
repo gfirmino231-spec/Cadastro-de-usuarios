@@ -39,6 +39,11 @@
     color: rgba(255, 255, 255, 0.7)
 
 }
+.mensagemErro{
+    color: #ff8080;
+    text-align: center;
+    margin: 0;
+}
 .botao{
     border-radius: 15px;
     padding: 12px 10px 8px;
@@ -70,4 +75,22 @@
 .botaoDeExcluir{
     background-color: transparent;
     border: none;
+    color: #fff;
+}
+.botoesDeAcao{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.botaoDeEditar{
+    background-color: transparent;
+    border: none;
+    color: #fff;
+}
+.botaoCancelar{
+    border-radius: 15px;
+    padding: 12px 10px 8px;
+    background-color: transparent;
+    border: 1px solid #a5a1fc;
+    width: 300px;
 }
