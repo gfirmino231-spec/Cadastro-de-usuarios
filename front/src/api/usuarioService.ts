@@ -3,12 +3,12 @@ import api from './api';
 export const UsuarioService = {
   listar: () => api.get('/usuarios'),
 
-  criar: (dados: { nome: string; email: string }) =>
+  criar: (dados: { nome: string; email: string; idade: number }) =>
     api.post('/usuarios', dados),
 
-  atualizar: (id: string, dados: any) =>
+  atualizar: (id: number, dados: any) =>
     api.put(`/usuarios/${id}`, dados),
 
-  deletar: (id: string) =>
+  deletar: (id: number) =>
     api.delete(`/usuarios/${id}`),
 };

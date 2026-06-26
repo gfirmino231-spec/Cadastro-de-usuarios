@@ -1,57 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsuarioEntity } from './usuarioEntity';
-import { error } from 'console';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsuarioService {
-    private usuarios : any [] = [];
-    
-    salvar(usuario){
-        this.usuarios.push(usuario)
+    constructor(private prisma: PrismaService) {}
 
-    }
-    listarUsuario(){
-        return this.usuarios
-    }
-    async existeComEmail(email:string){
-        const possivelUsuario = this.usuarios.find(
-            usuario => usuario.email === email
-
-        );
-        return possivelUsuario!== undefined
+    async salvar(usuario: UsuarioEntity) {
+        return this.prisma.user.create({
+            data: {
+                nome: usuario.nome,
+                email: usuario.email,
+                idade: usuario.idade,
+            },
+        });
     }
 
-    private buscarPorId(id:string){
-        const possivelUsuario = this.usuarios.find(
-            usuarioSalvo => usuarioSalvo.id === id
-        );
+    async listarUsuario() {
+        return this.prisma.user.findMany();
+    }
 
-        if(!possivelUsuario){
-            throw new error('Usuario não encontrado')
+    async existeComEmail(email: string) {
+        const possivelUsuario = await this.prisma.user.findUnique({ where: { email } });
+        return possivelUsuario !== null;
+    }
+
+    private async buscarPorId(id: number) {
+        const possivelUsuario = await this.prisma.user.findUnique({ where: { id } });
+        if (!possivelUsuario) {
+            throw new NotFoundException('Usuario não encontrado');
         }
-        return possivelUsuario
+        return possivelUsuario;
     }
-    async atualizar(id:string, dadosDeAtualizacao:Partial<UsuarioEntity>){
-        const usuario = this.buscarPorId(id)
 
-        Object.entries(dadosDeAtualizacao).forEach(([chave,valor])=>{
-            if(chave === 'id'){
-                return;
+    async atualizar(id: number, dadosDeAtualizacao: Partial<UsuarioEntity>) {
+        await this.buscarPorId(id);
+
+        if (dadosDeAtualizacao.email) {
+            const usuarioComEmail = await this.prisma.user.findUnique({ where: { email: dadosDeAtualizacao.email } });
+            if (usuarioComEmail && usuarioComEmail.id !== id) {
+                throw new BadRequestException('O e-mail já pertence a outro usuario!');
             }
-            usuario[chave] = valor
-        })
-        return usuario;
+        }
+
+        return this.prisma.user.update({
+            where: { id },
+            data: dadosDeAtualizacao,
+        });
     }
 
-    async remove(id:string){
-        const usuario = this.buscarPorId(id);
-        this.usuarios = this.usuarios.filter(
-            usuarioSalvo => usuarioSalvo.id !== id
-        );
-
-        return usuario;
+    async remove(id: number) {
+        await this.buscarPorId(id);
+        return this.prisma.user.delete({ where: { id } });
     }
-
 }
-
-

@@ -1,98 +1,133 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Cadastro de Usuários — Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST construída com **NestJS**, **Prisma ORM 7** e **PostgreSQL** (hospedado no **Supabase**), responsável pelo cadastro, listagem, atualização e remoção de usuários.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Este projeto tem foco no backend — o front-end (em `../../front`) é apenas uma interface simples em React para consumir esta API.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+| Camada | Tecnologia |
+|---|---|
+| Framework | [NestJS 11](https://nestjs.com) |
+| ORM | [Prisma 7](https://www.prisma.io) (com `@prisma/adapter-pg`) |
+| Banco de dados | PostgreSQL via [Supabase](https://supabase.com) |
+| Validação | `class-validator` / `class-transformer` |
+| Linguagem | TypeScript |
 
-## Project setup
+## Estrutura do projeto
 
-```bash
-$ npm install
+```
+src/
+├── main.ts                        # bootstrap da aplicação (CORS, ValidationPipe)
+├── app.module.ts                  # módulo raiz
+├── prisma/
+│   ├── prisma.module.ts           # módulo global do Prisma
+│   └── prisma.service.ts          # PrismaClient injetável (driver adapter pg)
+├── generated/prisma/               # client do Prisma gerado (não versionado)
+└── usuario/
+    ├── usuario.module.ts
+    ├── usuario.controller.ts      # rotas HTTP de /usuarios
+    ├── usuario.service.ts         # regras de negócio + acesso ao banco
+    ├── usuarioEntity.ts
+    └── dto/
+        ├── criar-usuario.dto.ts       # validação do POST
+        ├── AtualizaUsuarioDTO.ts      # validação do PUT
+        ├── ListaUsuarioDTO.ts         # formato de retorno (id, nome, email, idade)
+        └── validacao/
+            └── verificar-email.ts     # validador assíncrono de e-mail único (usado no cadastro)
+
+prisma/
+├── schema.prisma                  # modelo de dados (model User)
+└── migrations/                    # histórico de migrations SQL
 ```
 
-## Compile and run the project
+## Modelo de dados
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```prisma
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  nome      String
+  idade     Int
+  createdAt DateTime @default(now())
+}
 ```
 
-## Run tests
+## Endpoints
 
-```bash
-# unit tests
-$ npm run test
+Base path: `/usuarios`
 
-# e2e tests
-$ npm run test:e2e
+| Método | Rota | Body | Descrição |
+|---|---|---|---|
+| `POST` | `/usuarios` | `{ nome, email, idade }` | Cria um usuário. Valida nome obrigatório, e-mail válido e único, idade inteira entre 18 e 120 |
+| `GET` | `/usuarios` | — | Lista todos os usuários (`id`, `nome`, `email`, `idade`) |
+| `PUT` | `/usuarios/:id` | `{ nome, email, idade }` | Atualiza um usuário existente. O e-mail pode permanecer o mesmo do próprio usuário (a checagem de duplicidade ignora o registro que está sendo editado) |
+| `DELETE` | `/usuarios/:id` | — | Remove um usuário |
 
-# test coverage
-$ npm run test:cov
+Todas as rotas retornam `404` (`NotFoundException`) se o `id` não existir, e `400` (`BadRequestException`) em caso de dados inválidos ou e-mail duplicado.
+
+### Exemplo de resposta — `POST /usuarios`
+
+```json
+{
+  "usuario": { "id": 1, "nome": "Ana", "email": "ana@email.com", "idade": 25 },
+  "message": "usuario criado com sucesso"
+}
 ```
 
-## Deployment
+## Configuração do ambiente
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Crie um `.env` na raiz deste backend (`back/backend/.env`) com a connection string do Postgres do Supabase:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```env
+DATABASE_URL="postgresql://<usuario>:<senha>@<host>.pooler.supabase.com:5432/postgres"
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+> Usamos a porta **5432** (conexão direta), não o pooler em modo *transaction* (6543), pois o NestJS mantém um servidor de longa duração com seu próprio pool de conexões — não precisa do pgbouncer.
+>
+> Se a senha tiver caracteres especiais (`@`, `#`, etc.), faça o *URL encode* antes de colar na string (ex: `@` → `%40`).
 
-## Resources
+## Rodando o projeto
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# instalar dependências
+npm install
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# gerar o Prisma Client a partir do schema
+npx prisma generate
 
-## Support
+# aplicar as migrations no banco (cria as tabelas)
+npx prisma migrate dev
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# subir em modo desenvolvimento (watch)
+npm run start:dev
 
-## Stay in touch
+# build de produção
+npm run build
+npm run start:prod
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+A API sobe por padrão em `http://localhost:3000`. O CORS já está liberado para `http://localhost:5173` (porta padrão do Vite, usada pelo front).
 
-## License
+## Sobre a integração com Prisma 7 + Supabase
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Esse projeto usa a versão mais recente do Prisma (7), que mudou bastante em relação às versões anteriores — vale documentar as decisões tomadas aqui:
+
+- **Driver Adapter obrigatório**: a partir do Prisma 7, `PrismaClient` não aceita mais só uma connection string — é preciso passar um *driver adapter*. Para Postgres usamos `@prisma/adapter-pg` (`PrismaPg`), instanciado em [`prisma.service.ts`](src/prisma/prisma.service.ts) com a `DATABASE_URL`.
+- **`moduleFormat = "cjs"` no `schema.prisma`**: por padrão, o gerador do Prisma client tenta inferir o formato do módulo (ESM/CJS) a partir do `tsconfig.json`. Como este projeto usa `"module": "nodenext"` mas roda em CommonJS (sem `"type": "module"` no `package.json`), é necessário forçar `moduleFormat = "cjs"` no generator — caso contrário o client gerado usa `import.meta.url`, que quebra em runtime CJS.
+- **`prisma.config.ts`**: substitui o antigo bloco `url = env("DATABASE_URL")` dentro do `datasource` do `schema.prisma`. Esse arquivo é usado **apenas pela CLI do Prisma** (`generate`, `migrate`, `studio`) — por isso o `main.ts` carrega o `.env` manualmente com `import 'dotenv/config'` antes de iniciar o Nest, garantindo que a aplicação em si também tenha acesso à `DATABASE_URL`.
+- **`directUrl` foi removido**: versões antigas usavam uma URL separada (porta 5432) para migrations quando a aplicação rodava via pooler (porta 6543). No Prisma 7 isso não existe mais — por isso optamos por usar a conexão direta (5432) tanto para a aplicação quanto para as migrations.
+
+## Validações de negócio
+
+- **Nome**: obrigatório (`@IsNotEmpty`)
+- **E-mail**: precisa ser um e-mail válido (`@IsEmail`) e único na base. No cadastro, a unicidade é validada via decorator customizado (`@emailEhUnico`, em `dto/validacao/verificar-email.ts`). Na atualização, essa checagem é feita no `usuario.service.ts` (método `atualizar`), excluindo o próprio registro da comparação — assim, editar um usuário sem mudar o e-mail não é bloqueado por engano.
+- **Idade**: precisa ser um número inteiro entre 18 e 120 (`@IsInt`, `@Min(18)`, `@Max(120)`)
+
+## Testes
+
+```bash
+npm run test       # testes unitários
+npm run test:e2e   # testes end-to-end
+npm run test:cov   # cobertura
+```
